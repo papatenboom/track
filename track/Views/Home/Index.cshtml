@@ -1,0 +1,209 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    .ct-chart {
+        height: 400px;
+    }
+
+    .ct-line {
+        stroke-width: 3px;
+    }
+
+    .ct-point {
+        transition: all 100ms;
+        stroke-width: 6px;
+    }
+
+        .ct-point:hover {
+            stroke-width: 10px;
+        }
+
+    .ct-chart {
+        background-color: #f8f8f8;
+        width: 1200px;
+    }
+
+        .ct-chart span.ct-vertical {
+            display: none;
+        }
+
+    .wrap {
+        border: 10px solid #f8f8f8;
+        overflow: hidden;
+    }
+
+    .scroll {
+        overflow-x: scroll;
+        margin: -10px;
+        margin-bottom: -13px; //-22px;
+    }
+
+    .form-top.form-inline {
+        margin-bottom: 1em;
+    }
+    #datasetSelect {
+        min-width: 200px;
+    }
+    .form-bottom {
+        margin-top: 1em;
+    }
+
+
+</style>
+
+<div class="row">
+    <div class="col-12">
+
+        <form class="form-top">
+            
+            <div class="clearfix">
+                <div class="form-group float-left">
+                    <select id="datasetSelect" class="form-control selectpicker">
+                        @foreach (var label in (Dictionary<int, string>)Model)
+                        {
+                            <option value="@label.Key" @(label.Key.ToString() == (string)ViewData["lastId"] ? "selected=\"selected\"" : "")>@label.Value</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="form-group float-right">
+                    <button type="button" class="btn btn-link" data-toggle="collapse" data-target=".multi-collapse">Manage Datasets</button>
+                </div>
+            </div>
+
+            <div class="collapse multi-collapse">
+                <h5>Add New</h5>
+                <div class="form-group">
+                    <label>Label</label>
+                    <input type="text" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label></label>
+                </div>
+            </div>
+
+        </form>
+
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12 col-lg-12">
+
+        <div class="wrap">
+            <div class="scroll dragscroll">
+                <div class="ct-chart"></div>
+
+            </div>
+        </div>
+
+    </div>
+    <!--<div class="col-lg-3">
+        <div class="container" style="background-color:#f8f8f8;border-radius:3px;height: 100%"></div>
+    </div>-->
+</div>
+<div class="row">
+    <div class="col-md-6">
+
+        <div class="form-bottom">
+            <h5>Add Data</h5>
+            <form id="right">
+                <div class="form-group">
+                    <label>Value</label>
+                    <input type="text" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>Date</label>
+                    <input type="text" class="form-control" id="datetimeSelect">
+                </div>
+                <button type="button" class="btn btn-primary">Add</button>
+            </form>
+
+        </div>
+
+    </div>
+</div>
+
+<script>
+
+    // Initialize page
+    $('#datasetSelect').focus();
+
+    $('#datetimeSelect').datetimepicker();
+    $('#datetimeSelect').val(moment(new Date()).format("MM/DD/YYYY h:mm A"));
+    
+    $.get('@Url.Action("GetDataset", "Home")/' + encodeURI($('#datasetSelect').val()), function (data) {
+
+        refreshChart(JSON.parse(data), '.ct-chart');
+
+    });
+
+    // TODO: Make so left & right on dropdown scroll chart horizontally
+
+
+    // Dataset Select - On Change
+    $('#datasetSelect').change(function (e) {
+        $.get('@Url.Action("GetDataset", "Home")/' + encodeURI($('#datasetSelect').val()), function (data) {
+            
+            refreshChart(JSON.parse(data), '.ct-chart');
+
+        });
+    });
+
+    // Draw new chart
+    function refreshChart(series, selecter) {
+
+        // Create first data object
+        var data = {
+            //labels: []
+            series: [{
+                name: 'test',
+                data: []
+            }]
+        }
+
+        if (series != null) {
+            // Populate first data object
+            for (var i = 0; i < series.labels.length; i++) {
+                data.series[0].data.push({
+                    x: new Date(series.labels[i]),
+                    y: series.values[i]
+                });
+            }
+        }
+
+        // Define options
+        var options = {
+            axisX: {
+                type: Chartist.FixedScaleAxis,
+                divisor: Math.round(Math.max(1, parseInt(series.span) / 30)),
+                labelInterpolationFnc: function (value) {
+                    return moment(value).format('MMM YY');
+                }
+            },
+            fullWidth: true,
+            chartPadding: {
+                left: -20,
+                //right: 20
+            }
+        };
+
+
+
+        var span = parseInt(series.span);
+
+        console.log("span: " + span + "; w: " + span * 3.5 + "; d:" + Math.max(1, parseInt(series.span) / 30));
+
+        if (span) {
+            $('.ct-chart').css('width', span * 3.5);
+        } else {
+            $('.ct-chart').css('width', $('ct-chart').parent().css('width'));
+            console.log($('.ct-chart').css('width'));
+            console.log($('.ct-chart').parent().css('width'));
+        }
+
+        // Render new graph
+        new Chartist.Line(selecter, data, options);
+    }
+
+</script>

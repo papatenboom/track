@@ -1,0 +1,112 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    .ct-chart {
+        height: 400px;
+    }
+    .ct-line {
+        stroke-width: 2px;
+    }
+    .ct-point {
+        transition: all 100ms;
+        stroke-width: 4px;
+    }
+    .ct-point:hover {
+        stroke-width: 20px;
+    }
+    .ct-chart {
+        width: 1200px;
+    }
+
+    .scroll {
+        overflow-x: scroll;
+    }
+</style>
+
+<div class="row">
+    <div class="col-12">
+
+        <form>
+            <div class="form-group">
+                <select id="datasetSelect" class="form-control">
+                    @foreach (var label in Model)
+                    {
+                        <option @(label == (string)ViewData["lastId"] ? "selected=\"selected\"" : "") >@label</option>
+                    }
+                </select>
+            </div>
+        </form>
+
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12 col-lg-10 offset-lg-1">
+
+        <div class="scroll">
+            <div class="ct-chart"></div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    $('#datasetSelect').change(function (e) {
+        $.get('@Url.Action("GetDataset", "Home")/' + encodeURI($('#datasetSelect').val()), function (data) {
+
+            refreshChart(JSON.parse(data), '.ct-chart');
+
+        });
+    });
+
+    // Initialize page
+    $('#datasetSelect').focus();
+    
+    $.get('@Url.Action("GetDataset", "Home")/' + encodeURI($('#datasetSelect').val()), function (data) {
+
+        refreshChart(JSON.parse(data), '.ct-chart');
+
+    });
+
+    function refreshChart(series, selecter = 'ct-chart') {
+        
+        // Create first data object
+        var data = {
+            //labels: []
+            series: [{
+                name: 'test',
+                data: []
+            }]
+        }
+
+        if (series != null) {
+            // Populate first data object
+            for (var i = 0; i < series.labels.length; i++) {
+                data.series[0].data.push({
+                    x: new Date(series.labels[i]),
+                    y: series.values[i]
+                });
+            }
+        }
+
+        // Define options
+        var defOptions = {
+            axisX: {
+                type: Chartist.FixedScaleAxis,
+                divisor: 15,
+                labelInterpolationFnc: function (value) {
+                    return moment(value).format('MMM YY');
+                }
+            },
+            fullWidth: true,
+            chartPadding: {
+                left: -40,
+                right: 0
+            }
+        };
+
+        // Render new graph
+        new Chartist.Line(selecter, data, defOptions);
+    }
+
+</script>

@@ -1,0 +1,40 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<div class="row">
+    <div class="col-12">
+
+        <h2>Initialize</h2>
+        <form>
+            <div class="form-group">
+                <button id="admin" type="button" class="btn btn-info">Create Admin User</button>
+                <button id="copy" type="button" class="btn btn-info">Copy file to database</button>
+            </div>
+        </form>
+
+    </div>
+</div>
+
+<script>
+
+    $('#admin').click(function (e) {
+        
+        $.get('@Url.Action("CreateUser", "Test")', function (data) {
+            console.log(data);
+        });
+
+    });
+
+    $('#copy').click(function (e) {
+        
+        $.get('@Url.Action("CopyToDatabase", "Test")', function (data) {
+            console.log(data);
+        });
+
+        $('#copy').attr("disabled", "disabled");
+
+    });
+
+</script>
