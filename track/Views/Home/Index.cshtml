@@ -49,7 +49,6 @@
         margin-top: 1em;
     }
 
-
 </style>
 
 <div class="row">
@@ -116,7 +115,7 @@
                     <label>Date</label>
                     <input type="text" class="form-control" id="datetimeSelect">
                 </div>
-                <button type="button" class="btn btn-primary">Add</button>
+                <button type="button" id="add" class="btn btn-primary">Add</button>
             </form>
 
         </div>
@@ -148,6 +147,11 @@
             refreshChart(JSON.parse(data), '.ct-chart');
 
         });
+    });
+
+    // Add Value - On Click
+    $('#add').click(function (e) {
+
     });
 
     // Draw new chart

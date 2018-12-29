@@ -38,7 +38,7 @@ namespace track.Controllers
 
             dynamic records = new JObject();
             records.labels = new JArray(cur.getDateTimes());
-            records.values = new JArray(cur.getValues());
+            records.values = new JArray(cur.getProperty("Value"));
             records.span = cur.getTimeSpan();
             
 

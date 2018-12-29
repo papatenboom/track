@@ -23,7 +23,7 @@ namespace track.Models
             Label = label;
         }
 
-        public void createRecord(DateTime dateTime, double value)
+        public void createRecord(DateTime dateTime, Dictionary<string, object> props)
         {
             // Init start & end
             if (startDateTime.CompareTo(new DateTime()) == 0)
@@ -37,9 +37,14 @@ namespace track.Models
                 startDateTime = dateTime;
             if (dateTime.CompareTo(endDateTime) > 0)
                 endDateTime = dateTime;
-        
+
             //
-            RecordList.Add(new Record(dateTime, value));
+            Record temp = new Record(dateTime);
+            foreach (var p in props)
+            {
+                temp[p.Key] = p.Value;
+            }
+            RecordList.Add(temp);
         }
 
         public int recordCount()
@@ -47,17 +52,17 @@ namespace track.Models
             return RecordList.Count;
         }
 
-        public Dictionary<string, double> getRecordDictionary()
+       /* public Dictionary<string, double> getRecordDictionary()
         {
             Dictionary<string, double> nodeDict = new Dictionary<string, double>();
 
             foreach (Record n in RecordList)
             {
-                nodeDict.Add(n.DateTime.ToString(), n.Value);
+                //nodeDict.Add(n.DateTime.ToString(), n.Value);
             }
 
             return nodeDict;
-        }
+        }*/
         
         public List<DateTime> getDateTimes()
         {
@@ -74,14 +79,16 @@ namespace track.Models
             return new TimeSpan(endDateTime.Ticks - startDateTime.Ticks);
         }
 
-        public List<Object> getValues()
+        public List<Object> getProperty(string prop)
         {
-            List<Object> vList = new List<Object>();
+            List<Object>pList = new List<Object>();
 
-            foreach (Record n in RecordList)
-                vList.Add(n.Value);
+            foreach (Record r in RecordList)
+            {
+                pList.Add(r[prop]);
+            }
 
-            return vList;
+            return pList;
         }
     }
 }

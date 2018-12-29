@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Data;
 using System.Data.SqlClient;
 using System.Diagnostics;
 using System.Linq;
@@ -14,7 +15,7 @@ namespace track.Models
     {
 
         //
-        public static string connString = ConfigurationManager.ConnectionStrings["track"].ConnectionString;
+        public static string connString = ConfigurationManager.ConnectionStrings["track-desktop"].ConnectionString;
 
 
         // Add user
@@ -85,19 +86,19 @@ namespace track.Models
         }
 
         // Return dataset object by id
-        public static Dataset getDataset(int id)
+        public static Dataset getDataset(int datasetId)
         {
-            Dataset dataset = new Dataset("");
+            Dataset dataset;
 
             using (SqlConnection conn = new SqlConnection(connString))
             {
                 SqlCommand cmd;
                 SqlDataReader r;
 
-                string label;
+                string label = "";
 
                 // Get label of dataset with matching id
-                cmd = new SqlCommand("SELECT * FROM [Dataset] WHERE [Id]=" + id, conn);
+                cmd = new SqlCommand("SELECT * FROM [Dataset] WHERE [Id]=" + datasetId, conn);
 
                 // TODO: Fix so detects if null or more than 1
                 conn.Open();
@@ -106,24 +107,77 @@ namespace track.Models
                 {
                     label = r.GetString(r.GetOrdinal("Label"));
                 }
-                conn.Close();
+                r.Close();
+
+                //
+                dataset = new Dataset(label);
 
 
                 // Get records with matching dataset id
-                cmd = new SqlCommand("SELECT * FROM [Record] WHERE [SeriesId]=" + id, conn);
-
-                conn.Open();
+                cmd = new SqlCommand("GetRecords", conn) { CommandType = CommandType.StoredProcedure };
+                cmd.Parameters.Add(new SqlParameter("@Id", datasetId));
                 r = cmd.ExecuteReader();
-                
+
                 while (r.Read())
                 {
+                    Dictionary<string, object> props = new Dictionary<string, object>();
+
                     DateTime dt = r.GetDateTime(r.GetOrdinal("DateTime"));
-                    Double val = Double.Parse(r.GetString(r.GetOrdinal("Value")));
+                    string propString = r.GetString(r.GetOrdinal("Properties"));
 
-                    dataset.createRecord(dt, val);
+                    var test = propString.Split(';');
+
+                    foreach (var p in test)
+                    {
+                        int colon = p.IndexOf(':');
+                        string key = p.Substring(1, colon - 1);
+                        string val = p.Substring(colon + 1, p.Length - colon - 1);
+
+                        if (props.ContainsKey(key))
+                        {
+                            props[key] = val;
+                        } else
+                        {
+                            props.Add(key, val);
+                        }
+                    }
+
+                    dataset.createRecord(dt, props);
+
+
+                    //Debug.WriteLine(r.GetDateTime(r.GetOrdinal("DateTime")).ToString() + " - " + r.GetString(r.GetOrdinal("Properties")));
                 }
-                conn.Close();
 
+                /*
+                cmd = new SqlCommand("SELECT [Series].[Id], [Label], [Name] AS 'Type' FROM [Series] JOIN [SeriesType] ON [TypeId]=[SeriesType].[Id] WHERE [DatasetId]=" + datasetId, conn);
+                r = cmd.ExecuteReader();
+
+                List<int> ids = new List<int>();
+                List<string> labels = new List<string>();
+                List<string> types = new List<string>();
+
+                while (r.Read())
+                {
+                    ids.Add(r.GetInt32(r.GetOrdinal("Id")));
+                    labels.Add(r.GetString(r.GetOrdinal("Label")));
+                    types.Add(r.GetString(r.GetOrdinal("Type")));
+                }
+                r.Close();
+
+                foreach (int id in ids)
+                {
+                    cmd = new SqlCommand("SELECT [DateTime], [Value] FROM [Record] JOIN [Property] ON [Record].[Id] = [Property].[RecordId] WHERE [SeriesId]=" + id, conn);
+                    r = cmd.ExecuteReader();
+
+                    while (r.Read())
+                    {
+
+                    }
+
+                }
+                */
+
+                conn.Close();
             }
 
             return dataset;

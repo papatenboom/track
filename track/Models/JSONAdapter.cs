@@ -26,53 +26,74 @@ namespace track.Models
 
             dataJObject = JObject.Parse(dataJSON);
 
-            using (SqlConnection conn = new SqlConnection(ConfigurationManager.ConnectionStrings["track"].ConnectionString))
+            using (SqlConnection conn = new SqlConnection(ConfigurationManager.ConnectionStrings["track-desktop"].ConnectionString))
             {
                 SqlCommand cmd;
                 SqlDataReader r;
+                conn.Open();
 
                 foreach (JProperty child in dataJObject.Properties())
                 {
-                    // Get list of datetime string
-                    JArray dates = (JArray)child.Value.SelectToken("labels");
-                    List<string> dateList = dates.ToObject<List<string>>();
-
                     // Get "datasets"
                     JObject datasets = (JObject)child.Value.SelectToken("datasets").First;
 
+                    string label = (string)datasets.SelectToken("label");
 
                     // Create new Dataset
-                    Dataset testDataset = new Dataset((string)datasets.SelectToken("label"));
+                    //Dataset testDataset = new Dataset(label);
 
+                    int datasetId = 0, seriesId = 0, recordId = 0;
                     if (toDatabase)
                     {
-                        cmd = new SqlCommand("INSERT INTO [dbo].[Dataset] ([UserId], [Label]) VALUES ('1', '" + testDataset.Label + "')", conn);
-
-                        conn.Open();
+                        cmd = new SqlCommand("INSERT INTO [dbo].[Dataset] ([UserId], [Label]) VALUES ('1', '" + label + "')", conn);
+                        cmd.ExecuteNonQuery();
+                        
+                        cmd = new SqlCommand("SELECT [Id] FROM [dbo].[Dataset] WHERE [Label]='" + label + "'", conn);
                         r = cmd.ExecuteReader();
-                        conn.Close();
+                        
+                        while (r.Read())
+                        {
+                            datasetId = r.GetInt32(r.GetOrdinal("Id"));
+                        }
+                        r.Close();
 
                     }
-
-
-                    Debug.WriteLine(testDataset.Label + " - " + toDatabase.ToString());
-                    cmd = new SqlCommand("SELECT [Id] FROM [dbo].[Dataset] WHERE [Label]='" + testDataset.Label + "'", conn);
-                    conn.Open();
-                    r = cmd.ExecuteReader();
-
-                    int id = 0;
-                    while (r.Read())
-                    {
-                        id = r.GetInt32(r.GetOrdinal("Id"));
-                    }
-                    conn.Close();
-
 
                     // Get list of value from dataset
                     JArray values = (JArray)datasets.SelectToken("data");
                     List<string> valueList = values.ToObject<List<string>>();
 
+                    if (toDatabase)
+                    {
+                        // Need to determine type of data
+                        bool intFlag = true;
+                        foreach (var val in valueList)
+                        {
+                            if (!int.TryParse(val, out int result))
+                            {
+                                intFlag = false;
+                            }
+                        }
 
+                        // Create new Series for Dataset
+                        cmd = new SqlCommand("INSERT INTO [Series] ([DatasetId], [TypeId], [Label]) VALUES (" + datasetId + ", " + (intFlag ? 1 : 2) + ", 'Value')", conn);
+                        cmd.ExecuteNonQuery();
+
+                        cmd = new SqlCommand("SELECT [Id] FROM [Series] WHERE [DatasetId]=" + datasetId, conn);
+                        r = cmd.ExecuteReader();
+
+                        while (r.Read())
+                        {
+                            seriesId = r.GetInt32(r.GetOrdinal("Id"));
+                        }
+                        r.Close();
+                    }
+
+
+                    // Get list of datetime string
+                    JArray dates = (JArray)child.Value.SelectToken("labels");
+                    List<string> dateList = dates.ToObject<List<string>>();
+                    
                     // Create list of nodes in dataset
                     for (int i = 0; i < dateList.Count; i++)
                     {
@@ -97,25 +118,34 @@ namespace track.Models
                         }
 
                         // Add to object
-                        testDataset.createRecord(dt, val);
+                        //testDataset.createRecord(dt, val);
 
                         // Add to database
                         if (toDatabase)
                         {
-                            Debug.WriteLine(val);
-                            cmd = new SqlCommand("INSERT INTO [dbo].[Record] ([DatasetId], [DateTime], [Value]) VALUES (" + id + ", '" + dt.ToString() + "', " + val + ")", conn);
+                            cmd = new SqlCommand("INSERT INTO [Record] ([DatasetId], [DateTime]) VALUES (" + datasetId + ", '" + dt.ToString() + "')", conn);
+                            cmd.ExecuteNonQuery();
 
-                            conn.Open();
+                            cmd = new SqlCommand("SELECT [Id] FROM [Record] WHERE [DatasetId]=" + datasetId + " AND [DateTime]='" + dt.ToString() + "'", conn);
                             r = cmd.ExecuteReader();
-                            conn.Close();
 
+                            while (r.Read())
+                            {
+                                recordId = r.GetInt32(r.GetOrdinal("Id"));
+                            }
+                            r.Close();
+
+                            cmd = new SqlCommand("INSERT INTO [Property] ([RecordId], [SeriesId], [Value]) VALUES (" + recordId + ", " + seriesId + ", " + val + ")", conn);
+                            cmd.ExecuteNonQuery();
                         }
 
                     }
 
-                    dtList.Add(testDataset);
+                    //dtList.Add(testDataset);
 
                 }
+
+                conn.Close();
             }
         }
 
