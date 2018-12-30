@@ -15,7 +15,7 @@ namespace track.Models
     {
 
         //
-        public static string connString = ConfigurationManager.ConnectionStrings["track-desktop"].ConnectionString;
+        public static string connString = ConfigurationManager.ConnectionStrings["track"].ConnectionString;
 
 
         // Add user
@@ -147,6 +147,7 @@ namespace track.Models
 
                     //Debug.WriteLine(r.GetDateTime(r.GetOrdinal("DateTime")).ToString() + " - " + r.GetString(r.GetOrdinal("Properties")));
                 }
+                r.Close();
 
                 /*
                 cmd = new SqlCommand("SELECT [Series].[Id], [Label], [Name] AS 'Type' FROM [Series] JOIN [SeriesType] ON [TypeId]=[SeriesType].[Id] WHERE [DatasetId]=" + datasetId, conn);
@@ -181,6 +182,41 @@ namespace track.Models
             }
 
             return dataset;
+        }
+
+        public static void saveRecord(int datasetId, List<string> labels, List<string> values, DateTime datetime, string note = "")
+        {
+            using (SqlConnection conn = new SqlConnection(connString))
+            {
+                SqlCommand cmd;
+                SqlDataReader r;
+
+                conn.Open();
+
+                // Create record entry
+                cmd = new SqlCommand("CreateRecord", conn) { CommandType = CommandType.StoredProcedure };
+                cmd.Parameters.Add(new SqlParameter("@DatasetId", datasetId));
+                cmd.Parameters.Add(new SqlParameter("@DateTime", datetime.ToString()));
+                if (!string.IsNullOrEmpty(note))
+                    cmd.Parameters.Add(new SqlParameter("@Note", note));
+                cmd.Parameters.Add("@returnValue", SqlDbType.Int).Direction = ParameterDirection.ReturnValue;
+                cmd.ExecuteNonQuery();
+
+                int recordId = (int)cmd.Parameters["@returnValue"].Value;
+
+                // Add properties
+                for (var i = 0; i < labels.Count; i++)
+                {
+                    cmd = new SqlCommand("AddProperty", conn) { CommandType = CommandType.StoredProcedure };
+                    cmd.Parameters.Add(new SqlParameter("@RecordId", recordId));
+                    cmd.Parameters.Add(new SqlParameter("@Label", labels[i]));
+                    cmd.Parameters.Add(new SqlParameter("@Value", values[i]));
+
+                    cmd.ExecuteNonQuery();
+                }
+
+            }
+
         }
 
         // Utility ------------------------------------------------------------------------------

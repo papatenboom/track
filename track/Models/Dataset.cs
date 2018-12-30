@@ -13,11 +13,12 @@ namespace track.Models
         public string Label { get; set; }
 
         private List<Record> RecordList = new List<Record>();
+        private List<string> SeriesList = new List<string>();
 
         private DateTime startDateTime { get; set; }
         private DateTime endDateTime { get; set; }
 
-
+        
         public Dataset(string label)
         {
             Label = label;
@@ -42,6 +43,11 @@ namespace track.Models
             Record temp = new Record(dateTime);
             foreach (var p in props)
             {
+                // Test for new series
+                if (!SeriesList.Contains(p.Key))
+                    SeriesList.Add(p.Key);
+
+                // Assign property
                 temp[p.Key] = p.Value;
             }
             RecordList.Add(temp);
@@ -50,6 +56,11 @@ namespace track.Models
         public int recordCount()
         {
             return RecordList.Count;
+        }
+
+        public List<string> getSeries()
+        {
+            return SeriesList;
         }
 
        /* public Dictionary<string, double> getRecordDictionary()

@@ -24,3 +24,10 @@ textarea {
 }
 
 
+
+
+@media (max-width: 991px) {
+    .form-bottom {
+        margin-top: 1em;
+    }
+}

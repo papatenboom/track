@@ -33,13 +33,16 @@ namespace track.Controllers
 
         public JsonResult GetDataset(int id)
         {
+            Dataset dataset = DatabaseManager.getDataset(id);
 
-            Dataset cur = DatabaseManager.getDataset(id);
-
-            dynamic records = new JObject();
-            records.labels = new JArray(cur.getDateTimes());
-            records.values = new JArray(cur.getProperty("Value"));
-            records.span = cur.getTimeSpan();
+            dynamic datasetJObject = new JObject();
+            datasetJObject.series = new JArray(dataset.getSeries());
+            foreach (var s in dataset.getSeries())
+            {
+                datasetJObject[s] = new JArray(dataset.getProperty(s));
+            }
+            datasetJObject.records = new JArray(dataset.getDateTimes());
+            datasetJObject.span = dataset.getTimeSpan();
             
 
             // Set cookie
@@ -49,7 +52,31 @@ namespace track.Controllers
 
             Response.Cookies.Add(lastId);
 
-            return Json(JsonConvert.SerializeObject(records), JsonRequestBehavior.AllowGet);
+            return Json(JsonConvert.SerializeObject(datasetJObject), JsonRequestBehavior.AllowGet);
+        }
+
+        public JsonResult GetDatasetSeries(int id)
+        {
+            Dataset cur = DatabaseManager.getDataset(id);
+
+            return Json(JsonConvert.SerializeObject(cur.getSeries()), JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpPost]
+        public JsonResult SaveRecord()
+        {
+            // Store POST values
+            int datasetId = Int32.Parse(Request["id"]);
+            DateTime dateTime = DateTime.Parse(Request["datetime"]);
+
+            List<string> labels = Request["labels"].Split(',').ToList<string>();
+            List<string> values = Request["values"].Split(',').ToList<string>();
+
+            string note = Request["note"];
+            
+            DatabaseManager.saveRecord(datasetId, labels, values, dateTime, note);
+
+            return Json(true);
         }
     }
 }
