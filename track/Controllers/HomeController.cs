@@ -33,24 +33,33 @@ namespace track.Controllers
 
         public JsonResult GetDataset(int id)
         {
-            Dataset dataset = DatabaseManager.getDataset(id);
-
+            Dataset dataset;
             dynamic datasetJObject = new JObject();
-            datasetJObject.series = new JArray(dataset.getSeries());
-            foreach (var s in dataset.getSeries())
+
+            try
             {
-                datasetJObject[s] = new JArray(dataset.getProperty(s));
-            }
-            datasetJObject.records = new JArray(dataset.getDateTimes());
-            datasetJObject.span = dataset.getTimeSpan();
+                dataset = DatabaseManager.getDataset(id);
+                
+                datasetJObject.series = new JArray(dataset.getSeries());
+                foreach (var s in dataset.getSeries())
+                {
+                    datasetJObject[s] = new JArray(dataset.getProperty(s));
+                }
+                datasetJObject.records = new JArray(dataset.getDateTimes());
+                datasetJObject.span = dataset.getTimeSpan();
             
+                // Set cookie
+                HttpCookie lastId = new HttpCookie("lastDatasetId");
+                lastId.Value = id.ToString();
+                lastId.Expires = DateTime.Now.AddYears(10);
 
-            // Set cookie
-            HttpCookie lastId = new HttpCookie("lastDatasetId");
-            lastId.Value = id.ToString();
-            lastId.Expires = DateTime.Now.AddYears(10);
-
-            Response.Cookies.Add(lastId);
+                Response.Cookies.Add(lastId);
+                
+            }
+            catch (SqlException ex)
+            {
+                datasetJObject["error"] = ex.ToString();
+            }
 
             return Json(JsonConvert.SerializeObject(datasetJObject), JsonRequestBehavior.AllowGet);
         }
@@ -60,6 +69,33 @@ namespace track.Controllers
             Dataset cur = DatabaseManager.getDataset(id);
 
             return Json(JsonConvert.SerializeObject(cur.getSeries()), JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpPost]
+        public JsonResult CreateDataset()
+        {
+            string datasetLabel = Request["datasetLabel"];
+
+            List<string> labels = Request["labels"].Split(',').ToList<string>();
+            List<string> typeStrings = Request["types"].Split(',').ToList<string>();
+            List<int> typeIds = new List<int>();
+
+            foreach (string type in typeStrings)
+            {
+                if (type.ToLower() == "integer")
+                {
+                    typeIds.Add(1);
+                } else
+                {
+                    typeIds.Add(2);
+                }
+                Debug.WriteLine(type.ToString());
+            }
+
+            // TODO : replace user id 
+            DatabaseManager.createDataset(1, datasetLabel, labels, typeIds);
+
+            return Json("");
         }
 
         [HttpPost]

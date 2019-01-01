@@ -19,9 +19,11 @@ namespace track.Models
         private DateTime endDateTime { get; set; }
 
         
-        public Dataset(string label)
+        public Dataset(string label, List<string> series)
         {
             Label = label;
+
+            SeriesList = series;
         }
 
         public void createRecord(DateTime dateTime, Dictionary<string, object> props)
@@ -39,15 +41,10 @@ namespace track.Models
             if (dateTime.CompareTo(endDateTime) > 0)
                 endDateTime = dateTime;
 
-            //
+            // Create record & add properties
             Record temp = new Record(dateTime);
             foreach (var p in props)
             {
-                // Test for new series
-                if (!SeriesList.Contains(p.Key))
-                    SeriesList.Add(p.Key);
-
-                // Assign property
                 temp[p.Key] = p.Value;
             }
             RecordList.Add(temp);
@@ -56,6 +53,12 @@ namespace track.Models
         public int recordCount()
         {
             return RecordList.Count;
+        }
+
+        public void addSeries(string series)
+        { 
+            // TODO : test for duplicates
+            SeriesList.Add(series);
         }
 
         public List<string> getSeries()

@@ -26,7 +26,7 @@ namespace track.Models
 
             dataJObject = JObject.Parse(dataJSON);
 
-            using (SqlConnection conn = new SqlConnection(ConfigurationManager.ConnectionStrings["track-desktop"].ConnectionString))
+            using (SqlConnection conn = new SqlConnection(ConfigurationManager.ConnectionStrings["track"].ConnectionString))
             {
                 SqlCommand cmd;
                 SqlDataReader r;
@@ -97,46 +97,51 @@ namespace track.Models
                     // Create list of nodes in dataset
                     for (int i = 0; i < dateList.Count; i++)
                     {
-                        DateTime dt = new DateTime();
-                        try
+                        if (!string.IsNullOrEmpty(dateList[i]))
                         {
-                            dt = DateTime.Parse(dateList[i]);
-                        }
-                        catch (FormatException e)
-                        {
-                            Debug.WriteLine(e.ToString());
-                        }
 
-                        double val = 0;
-                        try
-                        {
-                            val = Double.Parse(valueList[i]);
-                        }
-                        catch (FormatException e)
-                        {
-                            Debug.WriteLine(e.ToString());
-                        }
-
-                        // Add to object
-                        //testDataset.createRecord(dt, val);
-
-                        // Add to database
-                        if (toDatabase)
-                        {
-                            cmd = new SqlCommand("INSERT INTO [Record] ([DatasetId], [DateTime]) VALUES (" + datasetId + ", '" + dt.ToString() + "')", conn);
-                            cmd.ExecuteNonQuery();
-
-                            cmd = new SqlCommand("SELECT [Id] FROM [Record] WHERE [DatasetId]=" + datasetId + " AND [DateTime]='" + dt.ToString() + "'", conn);
-                            r = cmd.ExecuteReader();
-
-                            while (r.Read())
+                            DateTime dt = new DateTime();
+                            try
                             {
-                                recordId = r.GetInt32(r.GetOrdinal("Id"));
+                                dt = DateTime.Parse(dateList[i]);
                             }
-                            r.Close();
+                            catch (FormatException e)
+                            {
+                                Debug.WriteLine(e.ToString());
+                            }
 
-                            cmd = new SqlCommand("INSERT INTO [Property] ([RecordId], [SeriesId], [Value]) VALUES (" + recordId + ", " + seriesId + ", " + val + ")", conn);
-                            cmd.ExecuteNonQuery();
+                            double val = 0;
+                            try
+                            {
+                                val = Double.Parse(valueList[i]);
+                            }
+                            catch (FormatException e)
+                            {
+                                Debug.WriteLine(e.ToString());
+                            }
+
+                            // Add to object
+                            //testDataset.createRecord(dt, val);
+
+                            // Add to database
+                            if (toDatabase)
+                            {
+                                Debug.WriteLine(dt.ToString());
+                                cmd = new SqlCommand("INSERT INTO [Record] ([DatasetId], [DateTime]) VALUES (" + datasetId + ", '" + dt.ToString() + "')", conn);
+                                cmd.ExecuteNonQuery();
+
+                                cmd = new SqlCommand("SELECT [Id] FROM [Record] WHERE [DatasetId]=" + datasetId + " AND [DateTime]='" + dt.ToString() + "'", conn);
+                                r = cmd.ExecuteReader();
+
+                                while (r.Read())
+                                {
+                                    recordId = r.GetInt32(r.GetOrdinal("Id"));
+                                }
+                                r.Close();
+
+                                cmd = new SqlCommand("INSERT INTO [Property] ([RecordId], [SeriesId], [Value]) VALUES (" + recordId + ", " + seriesId + ", " + val + ")", conn);
+                                cmd.ExecuteNonQuery();
+                            }
                         }
 
                     }

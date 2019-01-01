@@ -1,203 +1,174 @@
 ﻿@{
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
-<style>
+<div class="row">
+    <div class="col-12">
 
-    .nav {
-        margin-bottom: 1rem;
-        justify-content: space-between;
-    }
-        .nav .nav-item:first-child {
-            display: flex;
-        }
-        .nav .nav-item:first-child .nav-link {
-            padding: 0 0 8px;
-        }
-        .nav .nav-item:first-child .nav-link.active {
-            margin-bottom: 1px;
-        }
-        .nav .nav-item:first-child .nav-link.active,
-        .nav .nav-item:first-child .nav-link:hover,
-        .nav .nav-item:first-child .nav-link:focus {
-            border: 1px solid transparent;
-            border-bottom: none;
-        }
-        .nav .nav-link {
-            padding-bottom: 14px;
-        }
+        <!-- Manage Datasets Tab -->
+        <ul class="nav nav-tabs">
+            <li class="nav-item mr-2">
+                <select id="datasetSelect" class="form-control selectpicker">
+                    @foreach (var label in (Dictionary<int, string>)Model)
+                    {
+                        <option value="@label.Key" @(label.Key.ToString() == (string)ViewData["lastId"] ? "selected=\"selected\"" : "")>@label.Value</option>
+                    }
+                </select>
+            </li>
+            <li class="nav-item mr-auto">
+                <a class="nav-link" href="#tab-add">
+                    <i class="fas fa-plus"></i>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#tab-chart">Cancel</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#tab-chart">Save</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#tab-settings">Edit</a>
+            </li>
+        </ul>
+    </div>
+</div>
+<div id="tab-chart" class="active">
+    <div class="row">
 
-        /*
-            
-        .nav .nav-item:first-child .nav-link.active {
-            border-left: none;
-        }
-            .nav .nav-link:not(.active) #datasetSelect {
-                display: none;
-            }
-            .nav .nav-link.active #datasetText {
-                display:none;
-            }*/
+        <div class="order-2 col-12 col-md-4 col-lg-3 order-lg-1">
 
-    .ct-chart {
-        height: 400px;
-    }
+            <div class="form-bottom">
+                <h5><a data-toggle="collapse" href="#createRecord">Create Record</a></h5>
+                <form id="createRecord" class="collapse show">
 
-    .ct-line {
-        stroke-width: 3px;
-    }
+                    <!-- Property Inputs -->
+                    <div class="form-props"></div>
 
-    .ct-point {
-        transition: all 100ms;
-        stroke-width: 6px;
-    }
+                    <!-- DateTime Select -->
+                    <div class="form-group">
+                        <label>Date</label>
+                        <input type="text" class="form-control" id="datetimeSelect">
+                    </div>
 
-        .ct-point:hover {
-            stroke-width: 10px;
-        }
+                    <!-- Note Textarea -->
+                    <div class="form-group">
+                        <label>Note</label>
+                        <textarea class="form-control" id="noteTextarea" rows="2"></textarea>
+                    </div>
 
-    .ct-chart {
-        background-color: #f8f8f8;
-        width: 1200px;
-    }
+                    <button type="button" id="addRecord" class="btn btn-primary">Add</button>
+                </form>
 
-        .ct-chart span.ct-vertical {
-        }
+            </div>
 
-    .wrap {
-        border: 10px solid #f8f8f8;
-        overflow: hidden;
-    }
+        </div>
+        <div class="order-1 col-lg-9 order-md-1 order-lg-2">
 
-    .scroll {
-        overflow-x: scroll;
-        margin-bottom: -13px;
-    }
+            <div class="wrap">
+                <svg id="chart-labels"><g></g></svg>
+                <div class="scroll dragscroll">
+                    <div class="ct-chart">
+                    </div>
 
-    .form-top {
-        transition: background 300ms;
-    }
-    .form-top.show {
-        background-color: #eee;
-    }
-    .form-top.form-inline {
-        margin-bottom: 1em;
-    }
+                </div>
+            </div>
 
-    #datasetSelect {
-        min-width: 140px;
-    }
+        </div>
 
-</style>
+    </div>
 
-<div id="tabs">
+</div>
+<div id="tab-add">
     <div class="row">
         <div class="col-12">
 
-            <h5>Dataset</h5>
-            @*<form class="form-top">
+            <h4>Create Dataset</h4>
+            <form id="createDataset">
 
-                    <div class="clearfix">
-                        <div class="form-group float-left">
-                            <!-- Dataset Select -->
-                            <select id="datasetSelect" class="form-control selectpicker">
-                                @foreach (var label in (Dictionary<int, string>)Model)
-                                {
-                                    <option value="@label.Key" @(label.Key.ToString() == (string)ViewData["lastId"] ? "selected=\"selected\"" : "")>@label.Value</option>
-                                }
+                <div class="form-row mb-3">
+                    <div class="col-12 col-sm-6">
+                        <input type="text" class="form-control" id="datasetLabel" placeholder="Label">
+                    </div>
+                </div>
+                <h5>Properties</h5>
+                <div class="form-props">
+                    <div class="form-row mb-3 init">
+                        <div class="col-6 col-md-4">
+                            <input type="text" class="form-control" id="label-1" placeholder="Label">
+                        </div>
+                        <div class="col-5 col-md-3">
+                            <select class="form-control" id="type-1">
+                                <option>Integer</option>
+                                <option>Decimal</option>
                             </select>
                         </div>
-
-                        <!-- Manage Datasets Tab -->
-                        <div class="form-group float-right">
-                            <button type="button" class="btn btn-link" data-toggle="collapse" data-target=".multi-collapse" id="manageDatasets">Manage Datasets</button>
+                        <div class="col-1">
+                            <button type="button" class="btn btn-link remove">
+                                <i class="fas fa-times-circle"></i>
+                            </button>
                         </div>
-                    </div>
-
-                    <div class="collapse multi-collapse">
-                        <h5>Create Dataset</h5>
-                        <div class="form-group">
-                            <label>Label</label>
-                            <input type="text" class="form-control">
-                        </div>
-                    </div>
-
-                </form>*@
-            <ul class="nav nav-tabs">
-                <li class="nav-item">
-                        <select id="datasetSelect" class="form-control selectpicker">
-                            @foreach (var label in (Dictionary<int, string>)Model)
-                            {
-                                <option value="@label.Key" @(label.Key.ToString() == (string)ViewData["lastId"] ? "selected=\"selected\"" : "")>@label.Value</option>
-                            }
-                        </select>
-                        @*<span id="datasetText"></span>*@
-                        <a class="btn">
-                            <i class="fas fa-plus"></i>
-                        </a>
-                </li>
-                <!--<a class="btn-link">Cancel</a>-->
-                <li class="nav-item">
-                    <a class="nav-link" href="#tabs-2">Settings</a>
-                </li>
-            </ul>
+                        <!--
+    <div class="col-3">
+        <div class="dropdown">
+            <button class="btn btn-outline dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Integer
+            </button>
+            <div class="dropdown-menu">
+                <a class="dropdown-item" href="#">Integer</a>
+                <a class="dropdown-item" href="#">Decimal</a>
+            </div>
         </div>
     </div>
-    <div id="tabs-1">
-
-        <div class="row">
-            <div class="order-2 col-12 col-md-4 col-lg-3 order-lg-1">
-
-                <div class="form-bottom">
-                    <h5>Create Record</h5>
-                    <form id="createRecord">
-
-                        <!-- Property Inputs -->
-                        <div class="form-props"></div>
-
-                        <!-- DateTime Select -->
-                        <div class="form-group">
-                            <label>Date</label>
-                            <input type="text" class="form-control" id="datetimeSelect">
-                        </div>
-
-                        <!-- Note Textarea -->
-                        <div class="form-group">
-                            <label>Note</label>
-                            <textarea class="form-control" id="noteTextarea" rows="2"></textarea>
-                        </div>
-
-                        <button type="button" id="add" class="btn btn-primary">Add</button>
-                    </form>
-
+        <div class="col-3">
+            <div class="btn-group">
+                <input type="text" class="btn btn-outline w-100" placeholder="Units"  id="units-1" />
+                <button type="button" class="btn btn-outline dropdown-toggle dropdown-toggle-split" data-toggle="dropdown">
+                    <span class="sr-only">Toggle Dropdown</span>
+                </button>
+                <div class="dropdown-menu">
+                    <h6 class="dropdown-header">Weight</h6>
+                    <a class="dropdown-item" href="#">Pounds (lbs)</a>
+                    <a class="dropdown-item" href="#">Grams (g)</a>
+                    <div class="dropdown-divider"></div>
+                    <h6 class="dropdown-header">Time</h6>
+                    <a class="dropdown-item" href="#">Hours</a>
+                    <a class="dropdown-item" href="#">Minutes</a>
+                    <div class="dropdown-divider"></div>
+                    <h6 class="dropdown-header">Misc</h6>
+                    <a class="dropdown-item" href="#">Dollars ($)</a>
+                    <a class="dropdown-item" href="#">Reps</a>
                 </div>
-
             </div>
-            <div class="order-1 col-lg-9 order-md-1 order-lg-2">
-
-                <div class="wrap">
-                    <div class="scroll dragscroll">
-                        <div class="ct-chart"></div>
-
+        </div>
+    -->
                     </div>
                 </div>
 
-            </div>
+                <style>
+                    /* TODO */
+                    
+                    .dropdown-menu.show {
+                        transform: translate3d(0px, 38px, 0px) !important;
+                    }
+                </style>
+                <input type="button" class="btn btn-secondary" id="addProperty" value="Add Property" />
+
+            </form>
 
         </div>
-        <!--<div class="col-lg-3">
-            <div class="container" style="background-color:#f8f8f8;border-radius:3px;height: 100%"></div>
-        </div>-->
+
     </div>
 
-    <div id="tabs-2">
-        <div class="row">
-            <div class="col-12">
-                
+</div>
+<div id="tab-settings">
+    <div class="row">
+        <div class="col-12">
 
-            </div>
+            <h5>Settings</h5>
+            <form id="settings">
+
+            </form>
         </div>
     </div>
-
 </div>
 
 <script>
@@ -209,8 +180,17 @@
     $('#datasetSelect').focus();
 
     $('#datetimeSelect').datetimepicker();
+    
     $('#datetimeSelect').val(moment(new Date()).format("MM/DD/YYYY h:mm A"));
+    refreshTime();
 
+    $('.nav-link:contains(Cancel)').hide();
+    $('.nav-link:contains(Save)').hide();
+    $('.nav-link:contains(Edit)').hide();
+
+    var chart;
+
+    
     $.get('@Url.Action("GetDataset", "Home")/' + $('#datasetSelect').val(), function (data)
     {
         refreshForm(JSON.parse(data));
@@ -219,38 +199,128 @@
     });
 
     $(function () {
-       // $('#tabs').tabs();
 
-        $('#tab-2').hide();
+        // Tabs -------------------------------------------------------------
+        // Hide inactive tabs
+        $.each($('[id^=tab]:not(.active)'), function (index, value) {
+            $(value).hide();
+        });
+        
 
-        $('.nav-item').click(function (e) {
+        // Swap current displayed tab
+        $('.nav .nav-item').click(function (e) {
             e.preventDefault();
 
-            if ($(e.target).hasClass('active')) {
-                $(e.target).removeClass('active');
-               // $(e.target).html('Manage');
-                $('#tabs-1').show();
-                $('#tabs-2').hide();
+            var link = $('.nav-link', e.currentTarget);
+            var nextTab = $(link).attr('href');
 
-            } else {
-                $(e.target).addClass('active');
-                //$(e.target).html('Cancel');
-                $('#tabs-1').hide();
-                $('#tabs-2').show();
+            var currentTab = $('[id^=tab].active').first();
+
+            // Save
+            if (e.target.innerHTML == 'Save') {
+
+                var datasetLabel = $('#datasetLabel').val();
+
+                var propLabels = [];
+                var propTypes = [];
+
+                $.each($('input[id^=label]'), function (index, value) {
+                    propLabels.push($(value).val());
+                });
+                $.each($('select[id^=type]'), function (index, value) {
+                    propTypes.push($(value).val());
+                });
+
+                var data = {
+                    datasetLabel: datasetLabel,
+                    labels: propLabels,
+                    types: propTypes
+                };
+                
+                $.ajax({
+                    type: 'POST',
+                    url: '@Url.Action("CreateDataset", "Home")',
+                    traditional: true,
+                    data: data
+                });
+
+            } else 
+
+            if ($(link).length) {
+
+                // if (('#' + $(currentTab).attr('id')) != nextTab) {
+                $('.nav-link.active').removeClass('active');
+                $(currentTab).hide();
+                $(currentTab).removeClass('active');
+
+                $(link).addClass('active');
+                $(nextTab).show();
+                $(nextTab).addClass('active');
+                //}
+
+                $(nextTab).show();
+
+                // 
+                if (nextTab == '#tab-add' || nextTab == '#tab-settings') {
+                    if (nextTab == '#tab-add') {
+                        $('#datasetSelect').attr('disabled', true);
+                        $('.nav-link:contains(Edit)').hide();
+                    }
+                    $('.nav-link:contains(Cancel)').show();
+                    $('.nav-link:contains(Save)').show();
+
+                } else {
+                    $('.nav-link:contains(Cancel)').hide();
+                    $('.nav-link:contains(Save)').hide();
+                    $('#datasetSelect').attr('disabled', false);
+                }
             }
-
-            /*
-            if ($('.nav-link.active select')) {
-                $('#datasetText').html($('#datasetSelect option:selected').text());
-            }
-            $('.nav-link.active').removeClass('active');
-
-            if ($(e.target).hasClass('nav-link')) {
-                $(e.target).addClass('active');
-            } else {
-                $(e.target).parent().addClass('active');
-            }*/
         });
+
+        // Create Dataset ---------------------------------------------------
+        $('#addProperty').click(function (e) {
+
+            var clone = $('.form-row.init').last().clone();
+
+            // Increment clone input ids
+            var lastId = $('[id^=label]').attr('id');
+            var id = lastId.substr(lastId.length - 1);
+            var nextId = parseInt(id) + 1;
+            $('[id^=label]', clone).attr('id', 'label-' + nextId);
+            $('[id^=label]', clone).val('');
+
+            lastId = $('[id^=type]').attr('id');
+            id = lastId.substr(lastId.length - 1);
+            nextId = parseInt(id) + 1;
+            $('[id^=type]', clone).attr('id', 'type-' + nextId);
+
+
+            
+            $('button.remove', clone).click(function (e) {
+                // TODO - fix this crap
+                if ($(e.target).parent().parent().hasClass('form-row')) {
+                    $(e.target).parent().parent().remove();
+                } else if ($(e.target).parent().parent().parent().hasClass('form-row')) {
+                    $(e.target).parent().parent().parent().remove();
+                }
+            });
+
+            $('#createDataset .form-props').append(clone);
+        });
+
+        $('.dropdown-toggle').dropdown();
+
+        $('.dropdown-item').click(function (e) {
+            var base = $(e.target).parent().parent();
+
+            if ($('input[type=text]', base).length) {
+                $('input[type=text]', base).val($(e.target).html());
+            } else {
+                $('.dropdown-toggle', base).html($(e.target).html());
+            }
+            
+        });
+
     })
 
     // TODO: Make so left & right on dropdown scroll chart horizontally
@@ -270,27 +340,33 @@
         });
     });
 
-    // Add Value - On Click
-    $('#add').click(function (e)
+    // Create Record
+    $('#addRecord').click(function (e)
     {
         var datasetId = $('#datasetSelect').val();
         var datetime = $('#datetimeSelect').val();
         var labels = [];
         var values = [];
 
+        // Use current time is input in unchanged
+        var now = new Date();
+        if (datetime == moment(now).format("MM/DD/YYYY h:mm A")) {
+            datetime = moment(now).format("MM/DD/YYYY hh:mm:ss a");
+        }
+
         var formProps = $('.form-props .form-group');
 
         for (var i = 0; i < formProps.length; i++) {
             var label = $('label', formProps[i]).html();
             var value = $('.form-control', formProps[i]).val();
-            $('.form-control', formProps[i]).va('');
+            $('.form-control', formProps[i]).val('');
 
             labels.push(label);
             values.push(value);
         }
 
         var note = $('#noteTextarea').val();
-        
+
         var data = {
             "id": datasetId,
             "datetime": datetime,
@@ -298,7 +374,7 @@
             "values": values,
             "note": note
         };
-        
+
         $.ajax({
             type: 'POST',
             url: '@Url.Action("SaveRecord", "Home")',
@@ -306,11 +382,10 @@
             data: data
         })
             .done(function (data) {
-                
+
                 $.get('@Url.Action("GetDataset", "Home")/' + $('#datasetSelect').val(), function (data)
                 {
                     refreshChart(JSON.parse(data), '.ct-chart');
-
                 });
             });
     });
@@ -319,6 +394,18 @@
         //$('.multi-collapse').hasClass('show') ? $('.form-top').removeClass('show') : $('.form-top').addClass('show');
     });
 
+
+    function refreshTime() {
+
+        var now = moment(new Date()).format("MM/DD/YYYY h:mm A");
+        
+        if ($('#datetimeSelect').val() != now) {
+            $('#datetimeSelect').val(now);
+        }
+
+
+        var t = setTimeout(refreshTime, 1000);
+    }
 
     function refreshForm(dataset) {
 
@@ -336,15 +423,13 @@
     // Draw new chart
     function refreshChart(dataset, selecter) {
 
-        console.log(dataset);
-
         // Create Chartist data object
         var data = {
             //labels: []
             series: []
         }
 
-        // Move dataset -> Chartist data object
+        // Chartist data
         if (dataset != null) {
 
             // Populate first data object
@@ -366,13 +451,13 @@
             }
         }
 
-        // Define Chartist options objects
+        // Chartist options
         var options = {
             axisX: {
                 type: Chartist.FixedScaleAxis,
                 divisor: Math.round(Math.max(1, parseInt(dataset.span) / 30)),
                 labelInterpolationFnc: function (value) {
-                    return moment(value).format('MMM YY');
+                    return moment(value).format('MMM');
                 }
             },
             fullWidth: true,
@@ -383,10 +468,10 @@
         };
 
 
-
+        // Resize Chart
         var span = parseInt(dataset.span);
 
-        console.log("span: " + span + "; w: " + span * 3.5 + "; d:" + Math.max(1, span / 30));
+        //console.log("span: " + span + "; w: " + span * 3.5 + "; d:" + Math.max(1, span / 30));
 
         if (span) {
             if (span * 2 < $('.scroll')[0].clientWidth) {
@@ -399,10 +484,36 @@
         }
 
         // Render new graph
-        new Chartist.Line(selecter, data, options);
+        if (!chart) {
+            chart = new Chartist.Line(selecter, data, options);
+        } else {
+            chart.update(data, options);
+        }
+        
+        // Move vertical labels
+        $.each($('#chart-labels g').children(), function (i, val) {
+            $(val).remove();
+        })
+        checkLabels()
 
         // Scroll chart to right edge
         $('.scroll')[0].scrollLeft = $('.scroll')[0].scrollWidth - $('.scroll')[0].clientWidth;
+    }
+
+
+    // Check is vertical Chart labels have appeared
+    function checkLabels() {
+
+        var vertLabels = $('.ct-start').parent();
+        $.each($(vertLabels), function (id, value) {
+            $(value).attr('y', parseInt($(value).attr('y')) + 20);
+        });
+
+        if (!vertLabels.length) {
+            setTimeout(checkLabels, 100);
+        } else {
+            $('#chart-labels g').append($(vertLabels));
+        }
     }
 
 </script>
