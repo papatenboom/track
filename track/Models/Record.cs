@@ -21,6 +21,12 @@ namespace track.Models
             DateTime = dateTime;
         }
 
+        public Record(DateTime dateTime, string note)
+        {
+            DateTime = dateTime;
+            Note = note;
+        }
+
         public Record(DateTime dateTime, Dictionary<string, object> props)
         {
             DateTime = dateTime;

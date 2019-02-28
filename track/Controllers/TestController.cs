@@ -55,6 +55,11 @@ namespace track.Controllers
             return View();
         }
 
+        public ActionResult Chart()
+        {
+            return View();
+        }
+
         public JsonResult CreateUser()
         {
             // Return new user id or 0

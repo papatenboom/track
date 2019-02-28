@@ -26,6 +26,9 @@ h5 a {
     display: none;
 }
 
+#archive .nav-link {
+    color: #dc3545;
+}
 
 
 /* Bootstrap 4 - Overrides -----------------------------------------*/
@@ -46,18 +49,36 @@ input.btn {
         display: none;
     }
 }
+
+.form-control[id^=edit-color] {
+    display: inline-block;
+    width: calc(100% - 15px);
+}
+.form-control[id^=color] {
+    max-width: 36px;
+}
+
 button.remove {
     padding: 7px 2px 2px;
 
     i {
         color: #dc3545;
         font-size: 22px;
-        opacity: .5;
+        opacity: .3;
         transition: opacity 200ms;
 
         &:hover {
             opacity: 1;
         }
+    }
+}
+
+.addProperty {
+    opacity: .5;
+    transition: 200ms;
+
+    &:hover {
+        opacity: 1;
     }
 }
 
@@ -92,7 +113,7 @@ div[id^=tab] {
 
 .ct-point {
     transition: all 100ms;
-    stroke-width: 6px;
+    stroke-width: 8px;
 }
 
 .ct-point:hover {
@@ -128,6 +149,7 @@ $label-width: 35px;
 }
 
 .scroll {
+    background-color: #f8f8f8;
     overflow-x: hidden;
     overflow-x: scroll;
     margin-bottom: -13px;
@@ -153,6 +175,13 @@ $label-width: 35px;
 
     input.btn {
         max-width: none;
+    }
+}
+
+@media (min-width: 768px) {
+
+    .ct-point {
+        stroke-width:6px;
     }
 }
 

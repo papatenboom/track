@@ -32,6 +32,7 @@ namespace track
             bundles.Add(new ScriptBundle("~/bundles/site").Include(
                       "~/Scripts/moment.js",
                         "~/Scripts/chartist.min.js",
+                        "~/Scripts/chartist-plugin-tooltip.min.js",
                         "~/Scripts/bootstrap-datetimepicker.min.js"));
             
 
@@ -39,6 +40,7 @@ namespace track
                       "~/Content/bootstrap.min.css",
                       "~/Content/bootstrap-datetimepicker.min.css",
                       "~/Content/chartist.min.css",
+                      "~/Content/chartist-plugin-tooltip.css",
                       "~/Content/site.css"));
             
         }

@@ -162,15 +162,18 @@
     <Content Include="Content\bootstrap-datetimepicker.css" />
     <Content Include="Content\bootstrap-datetimepicker.min.css" />
     <Content Include="Content\bootstrap.min.css" />
+    <Content Include="Content\chartist-plugin-tooltip.css" />
     <Content Include="Content\chartist.css" />
     <Content Include="Content\chartist.min.css" />
+    <Content Include="Content\Site.css">
+      <DependentUpon>Site.scss</DependentUpon>
+    </Content>
     <Content Include="Content\Site.min.css">
       <DependentUpon>Site.css</DependentUpon>
     </Content>
     <Content Include="favicon.ico" />
     <Content Include="fonts\glyphicons-halflings-regular.svg" />
     <Content Include="Global.asax" />
-    <Content Include="Content\Site.css" />
     <Content Include="Scripts\bootstrap-datetimepicker.min.js" />
     <Content Include="Scripts\bootstrap.js" />
     <Content Include="Scripts\bootstrap.min.js" />
@@ -179,6 +182,7 @@
     </Content>
     <Content Include="data.json" />
     <Content Include="data_120818.json" />
+    <Content Include="Scripts\chartist-plugin-tooltip.min.js" />
     <Content Include="Scripts\chartist.min.js.map" />
     <Content Include="Content\chartist.css.map" />
     <Content Include="Content\Site.scss" />
@@ -223,6 +227,10 @@
     <Content Include="Views\Home\Test.cshtml" />
     <Content Include="Views\Test\Index.cshtml" />
     <Content Include="Views\Home\_Chart.cshtml" />
+    <Content Include="Views\Shared\_Modals.cshtml" />
+    <Content Include="Views\Home\Partials\_Modal.cshtml" />
+    <Content Include="Views\Home\Partials\_EditDataset.cshtml" />
+    <Content Include="Views\Test\Chart.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

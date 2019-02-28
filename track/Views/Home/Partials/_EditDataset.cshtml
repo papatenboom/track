@@ -1,0 +1,31 @@
+﻿<form class="form-edit-dataset">
+
+    <div class="form-group">
+        <label>Label</label>
+        <input type="text" class="form-control" id="edit-datasetLabel" />
+    </div>
+
+    <h5>Properties</h5>
+    <div class="form-props">
+
+        <div class="form-row mb-3 init">
+            <div class="col-6 col-md-4">
+                <input type="text" class="form-control" id="edit-prop-label-0" placeholder="Label">
+            </div>
+            <div class="col-5 col-md-3">
+                <select class="form-control" id="edit-prop-type-0">
+                    <option value="int">Integer</option>
+                    <option value="double">Decimal</option>
+                </select>
+            </div>
+            <div class="col-1">
+                <button type="button" class="btn btn-link remove">
+                    <i class="fas fa-times-circle"></i>
+                </button>
+            </div>
+        </div>
+
+    </div>
+    <input type="button" class="btn btn-secondary addProperty" value="Add Property" />
+
+</form>

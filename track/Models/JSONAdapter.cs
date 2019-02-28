@@ -12,6 +12,8 @@ namespace track.Models
 {
     public class JSONAdapter
     {
+        private string connString = ConfigurationManager.ConnectionStrings["track"].ConnectionString;
+
         private string dataJSON;
 
         private JObject dataJObject;
@@ -26,7 +28,7 @@ namespace track.Models
 
             dataJObject = JObject.Parse(dataJSON);
 
-            using (SqlConnection conn = new SqlConnection(ConfigurationManager.ConnectionStrings["track"].ConnectionString))
+            using (SqlConnection conn = new SqlConnection(connString))
             {
                 SqlCommand cmd;
                 SqlDataReader r;
@@ -45,12 +47,12 @@ namespace track.Models
                     int datasetId = 0, seriesId = 0, recordId = 0;
                     if (toDatabase)
                     {
-                        cmd = new SqlCommand("INSERT INTO [dbo].[Dataset] ([UserId], [Label]) VALUES ('1', '" + label + "')", conn);
+                        cmd = new SqlCommand("INSERT INTO [dbo].[Dataset] ([UserId], [Label], [Archived]) VALUES ('1', '" + label + "', 0)", conn);
                         cmd.ExecuteNonQuery();
-                        
+
                         cmd = new SqlCommand("SELECT [Id] FROM [dbo].[Dataset] WHERE [Label]='" + label + "'", conn);
                         r = cmd.ExecuteReader();
-                        
+
                         while (r.Read())
                         {
                             datasetId = r.GetInt32(r.GetOrdinal("Id"));
@@ -93,7 +95,7 @@ namespace track.Models
                     // Get list of datetime string
                     JArray dates = (JArray)child.Value.SelectToken("labels");
                     List<string> dateList = dates.ToObject<List<string>>();
-                    
+
                     // Create list of nodes in dataset
                     for (int i = 0; i < dateList.Count; i++)
                     {

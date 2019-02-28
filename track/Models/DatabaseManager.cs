@@ -169,6 +169,7 @@ namespace track.Models
                 while (r.Read())
                 {
                     datasetLabel = r.GetString(r.GetOrdinal("Label"));
+                    
                 }
                 r.Close();
 
@@ -178,17 +179,34 @@ namespace track.Models
                 cmd.Parameters.Add(new SqlParameter("@DatasetId", datasetId));
                 r = cmd.ExecuteReader();
 
+                List<int> seriesIdList = new List<int>();
                 List<string> seriesList = new List<string>();
+                List<string> seriesTypeList = new List<string>();
+                List<string> seriesColorList = new List<string>();
                 while (r.Read())
                 {
-                    string seriesLabel = r.GetString(r.GetOrdinal("Label"));
+                    int seriesId = r.GetInt32(r.GetOrdinal("SeriesId"));
+                    seriesIdList.Add(seriesId);
 
+                    string seriesLabel = r.GetString(r.GetOrdinal("Label"));
                     seriesList.Add(seriesLabel);
+
+                    string seriesType = r.GetString(r.GetOrdinal("SeriesType"));
+                    seriesTypeList.Add(seriesType);
+
+                    if (r.IsDBNull(r.GetOrdinal("Color")))
+                    {
+                        seriesColorList.Add(null);
+                    } else
+                    {
+                        string seriesColor = r.GetString(r.GetOrdinal("Color"));
+                        seriesColorList.Add(seriesColor);
+                    }
                 }
                 r.Close();
 
                 //
-                dataset = new Dataset(datasetLabel, seriesList);
+                dataset = new Dataset(datasetLabel, seriesIdList, seriesList, seriesTypeList, seriesColorList);
 
 
                 // Get records with matching dataset id
@@ -202,6 +220,9 @@ namespace track.Models
 
                     DateTime dt = r.GetDateTime(r.GetOrdinal("DateTime"));
                     string propString = r.GetString(r.GetOrdinal("Properties"));
+                    string note = "";
+                    if (!r.IsDBNull(r.GetOrdinal("Text")))
+                        note = r.GetString(r.GetOrdinal("Text"));
 
                     var test = propString.Split(';');
 
@@ -220,7 +241,12 @@ namespace track.Models
                         }
                     }
 
-                    dataset.createRecord(dt, props);
+                    //Debug.WriteLine(dt.ToString() + " - " + props.ToString());
+
+                    if (!string.IsNullOrEmpty(note))
+                        dataset.createRecord(dt, props, note);
+                    else
+                        dataset.createRecord(dt, props);
 
 
                     //Debug.WriteLine(r.GetDateTime(r.GetOrdinal("DateTime")).ToString() + " - " + r.GetString(r.GetOrdinal("Properties")));
@@ -295,6 +321,42 @@ namespace track.Models
 
             }
 
+        }
+
+        public static void updateDataset(int datasetId, string label)
+        {
+            using (SqlConnection conn = new SqlConnection(connString))
+            {
+                conn.Open();
+
+                using (SqlCommand cmd = new SqlCommand("UpdateDataset", conn) { CommandType = CommandType.StoredProcedure })
+                {
+                    cmd.Parameters.Add(new SqlParameter("@DatasetId", datasetId));
+                    cmd.Parameters.Add(new SqlParameter("@Label", label));
+
+                    cmd.ExecuteNonQuery();
+                }
+
+            }
+        }
+
+        public static void updateSeries(int seriesId, string label = null, string color = null)
+        {
+            using (SqlConnection conn = new SqlConnection(connString))
+            {
+                conn.Open();
+
+                using (SqlCommand cmd = new SqlCommand("UpdateSeries", conn) { CommandType = CommandType.StoredProcedure })
+                {
+                    cmd.Parameters.Add(new SqlParameter("@SeriesId", seriesId));
+                    if (label != null)
+                        cmd.Parameters.Add(new SqlParameter("@Label", label));
+                    if (color != null)
+                        cmd.Parameters.Add(new SqlParameter("@Color", color));
+
+                    cmd.ExecuteNonQuery();
+                }
+            }
         }
 
         // Utility ------------------------------------------------------------------------------

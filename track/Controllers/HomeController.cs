@@ -31,6 +31,12 @@ namespace track.Controllers
             return View(datasetDict);
         }
 
+        public JsonResult GetDatasets(int id)
+        {
+            Dictionary<int, string> datasetDict = DatabaseManager.getDatasetLabels();
+            return Json(JsonConvert.SerializeObject(datasetDict), JsonRequestBehavior.AllowGet);
+        }
+
         public JsonResult GetDataset(int id)
         {
             Dataset dataset;
@@ -40,7 +46,13 @@ namespace track.Controllers
             {
                 dataset = DatabaseManager.getDataset(id);
                 
+
+                datasetJObject.label = dataset.Label;
+                datasetJObject.ids = new JArray(dataset.getSeriesIds());
                 datasetJObject.series = new JArray(dataset.getSeries());
+                datasetJObject.types = new JArray(dataset.getSeriesTypes());
+                datasetJObject.colors = new JArray(dataset.getSeriesColors());
+                datasetJObject.notes = new JArray(dataset.getNotes());
                 foreach (var s in dataset.getSeries())
                 {
                     datasetJObject[s] = new JArray(dataset.getProperty(s));
@@ -111,6 +123,49 @@ namespace track.Controllers
             string note = Request["note"];
             
             DatabaseManager.saveRecord(datasetId, labels, values, dateTime, note);
+
+            return Json(true);
+        }
+
+        [HttpPost]
+        public JsonResult UpdateDataset()
+        {
+
+            if (Request["datasetLabel"] != null)
+            {
+                Debug.WriteLine(Request["datasetId"]);
+                Debug.WriteLine(Request["datasetLabel"]);
+
+                int datasetId = Int32.Parse(Request["datasetId"]);
+                string datasetLabel = Request["datasetLabel"];
+
+                DatabaseManager.updateDataset(datasetId, datasetLabel);
+            }
+
+            if (Request["labels"] != null)
+            {
+                Debug.WriteLine(Request["id"]);
+                Debug.WriteLine(Request["labels"]);
+                Debug.WriteLine(Request["colors"]);
+
+                List<string> ids = Request["ids"].Split(',').ToList<string>();
+                List<string> labels = Request["labels"].Split(',').ToList<string>();
+                List<string> colors = Request["colors"].Split(',').ToList<string>();
+
+                for (int i = 0; i < ids.Count; i++)
+                {
+                    int seriesId = Int32.Parse(ids[i]);
+
+                    DatabaseManager.updateSeries(seriesId, labels[i], colors[i]);
+                }
+            }
+
+            return Json(true);
+        }
+
+        [HttpPost]
+        public JsonResult UpdateSeries()
+        {
 
             return Json(true);
         }
