@@ -1,0 +1,61 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<script src="https://unpkg.com/chartist-plugin-tooltips@0.0.17"></script>
+<style>
+    .chartist-tooltip {
+        opacity: 0;
+        position: absolute;
+        margin: 20px 0 0 10px;
+        background: rgba(0, 0, 0, 0.8);
+        color: #FFF;
+        padding: 5px 10px;
+        border-radius: 4px;
+    }
+
+        .chartist-tooltip.tooltip-show {
+            opacity: 1;
+        }
+</style>
+
+
+
+
+<div id="myChart"></div>
+
+
+
+
+<script>
+    var data = {
+        labels: ["Mon", "Tue", "Wed"],
+        series: [
+            [10, 20, 75]
+        ],
+    }
+
+    var options = {
+        low: 0,
+        high: 100,
+        showGridBackground: false,
+        showArea: true,
+        axisX: {
+            showGrid: false
+        },
+        axisY: {},
+        plugins: [
+            /*Chartist.plugins.ctPointLabels({
+                textAnchor: 'middle',
+                labelInterpolationFnc: function (value) {
+                    console.log("i was called");
+                    return '$' + value
+                }
+            }),*/
+            Chartist.plugins.tooltip({
+
+            })
+        ]
+    };
+
+    var m = new Chartist.Line('#myChart', data, options);
+</script>

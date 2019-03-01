@@ -1,0 +1,194 @@
+﻿.container {
+    padding: 20px 15px;
+}
+
+/* Set padding to keep content from hitting the edges */
+.body-content {
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+/* Override the default bootstrap behavior where horizontal description lists 
+   will truncate terms that are too long to fit in the left column 
+*/
+.dl-horizontal dt {
+    white-space: normal;
+}
+
+/* Basic HTML ------------------------------------------------------*/
+h5 a {
+    color: #212529;
+}
+
+/* Navigation ------------------------------------------------------*/
+
+.navbar .nav-item {
+    display: none;
+}
+
+#archive .nav-link {
+    color: #dc3545;
+}
+
+
+/* Bootstrap 4 - Overrides -----------------------------------------*/
+.btn-outline {
+    background-color: #fff;
+    border: 1px solid #ccc;
+}
+
+input.btn {
+    text-align: left;
+    max-width: none;
+}
+
+
+/* Forms ---------------------------------------------------------- */
+.form-row:first-child {
+    button.remove {
+        display: none;
+    }
+}
+
+.form-control[id^=edit-color] {
+    display: inline-block;
+    width: calc(100% - 15px);
+}
+.form-control[id^=color] {
+    max-width: 36px;
+}
+
+button.remove {
+    padding: 7px 2px 2px;
+
+    i {
+        color: #dc3545;
+        font-size: 22px;
+        opacity: .3;
+        transition: opacity 200ms;
+
+        &:hover {
+            opacity: 1;
+        }
+    }
+}
+
+.addProperty {
+    opacity: .5;
+    transition: 200ms;
+
+    &:hover {
+        opacity: 1;
+    }
+}
+
+
+/* Index - Sub-Nav -------------------------------------------------*/
+.nav {
+
+    .nav-link {
+        //color: 
+        padding-bottom: 12px;
+    }
+}
+.nav-link.active[href$=chart] {
+    //display: none;
+}
+
+
+/* Index - Tabs ----------------------------------------------------*/
+div[id^=tab] {
+    margin-top: 1rem;
+}
+
+
+/* Chartist ------------------------------------------------------- */
+.ct-chart {
+    height: 400px;
+}
+
+.ct-line {
+    stroke-width: 3px;
+}
+
+.ct-point {
+    transition: all 100ms;
+    stroke-width: 8px;
+}
+
+.ct-point:hover {
+    stroke-width: 10px;
+}
+
+.ct-chart {
+    background-color: #f8f8f8;
+    width: 1200px;
+
+    // Left labels
+    span.ct-vertical {
+    }
+}
+
+/* Chartist - Vertical labels ----------------------------------------*/
+$label-width: 35px;
+#chart-labels {
+    height: 100%;
+    width: $label-width;
+    position: absolute;
+    top: 0;
+    background-color: #f8f8f8;
+}
+.ct-chart-line {
+}
+
+
+
+.wrap {
+    border: 10px solid #f8f8f8;
+    overflow: hidden;
+}
+
+.scroll {
+    background-color: #f8f8f8;
+    overflow-x: hidden;
+    overflow-x: scroll;
+    margin-bottom: -13px;
+}
+
+.form-top {
+    transition: background 300ms;
+}
+
+#datasetSelect {
+    min-width: 160px;
+}
+
+
+@media (min-width: 576px) {
+
+    /* Set width on the form input elements since they're 100% wide by default */
+    input,
+    select,
+    textarea {
+        max-width: 280px;
+    }
+
+    input.btn {
+        max-width: none;
+    }
+}
+
+@media (min-width: 768px) {
+
+    .ct-point {
+        stroke-width:6px;
+    }
+}
+
+@media (max-width: 991px) {
+    .form-bottom {
+        margin-top: 1em;
+    }
+}
+
+

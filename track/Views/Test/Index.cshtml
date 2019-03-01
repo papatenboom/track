@@ -11,8 +11,16 @@
             <div class="form-group">
                 <button id="admin" type="button" class="btn btn-info">Create Admin User</button>
                 <button id="copy" type="button" class="btn btn-info">Copy file to database</button>
+                <!--
+
+                    <button id="test" type="button" class="btn btn-info">Test DB Connection</button>
+                    <button id="testController" type="button" class="btn btn-info">Test Controller</button>
+
+                -->
             </div>
         </form>
+
+        <label id="output"></label>
 
     </div>
 </div>
@@ -31,10 +39,30 @@
         
         $.get('@Url.Action("CopyToDatabase", "Test")', function (data) {
             console.log(data);
+            $('#output').html(data);
         });
 
         $('#copy').attr("disabled", "disabled");
 
     });
+
+
+    @*$('#test').click(function (e) {
+        console.log('test db clicked');
+        $('#output').html('Testing db connection');
+        $.get('@Url.Action("TestDatabase", "Test")', function (data) {
+            console.log(data);
+            $('#output').html('<br>' + data);
+        });
+    });
+
+    $('#testController').click(function (e) {
+        console.log('test controller clicked');
+        $('#output').html('Testing controller');
+        $.get('@Url.Action("Test", "Test")', function (data) {
+            console.log(data);
+            $('#output').append('<br>' + data);
+        });
+    });*@
 
 </script>
